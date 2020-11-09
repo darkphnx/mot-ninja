@@ -3,21 +3,21 @@ package vesapi
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 )
 
 const (
-	// BaseURL contains the request endpoint for the VES API
-	BaseURL = "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles"
+	defaultHost = "https://driver-vehicle-licensing.api.gov.uk"
 )
 
 // Client is an API Client for Vehicle Enquiry Service API
 type Client struct {
-	apiKey     string
-	BaseURL    string
-	HTTPClient *http.Client
+	apiKey   string
+	baseHost string
+	client   *http.Client
 }
 
 // Date is a special Time which only has date components
@@ -62,11 +62,15 @@ type VehicleStatus struct {
 }
 
 // NewClient returns a new Vehicle Enquiry Service API Client
-func NewClient(apiKey string) *Client {
+func NewClient(apiKey, host string) *Client {
+	if host == "" {
+		host = defaultHost
+	}
+
 	return &Client{
-		apiKey:  apiKey,
-		BaseURL: BaseURL,
-		HTTPClient: &http.Client{
+		apiKey:   apiKey,
+		baseHost: host,
+		client: &http.Client{
 			Timeout: time.Minute,
 		},
 	}
@@ -76,25 +80,23 @@ func NewClient(apiKey string) *Client {
 func (c *Client) GetVehicleStatus(registrationNumber string) (*VehicleStatus, error) {
 	requestBody := fmt.Sprintf("{\"registrationNumber\":\"%s\"}", registrationNumber)
 
-	req, err := http.NewRequest("POST", c.BaseURL, strings.NewReader(requestBody))
+	req, err := http.NewRequest("POST", c.baseHost+"/vehicle-enquiry/v1/vehicles", strings.NewReader(requestBody))
 
 	if err != nil {
 		return nil, err
 	}
 
 	res := VehicleStatus{}
-	if err := c.sendRequest(req, &res); err != nil {
-		return nil, err
-	}
+	err = c.sendRequest(req, &res)
 
-	return &res, nil
+	return &res, err
 }
 
 func (c *Client) sendRequest(req *http.Request, vehicleStatus *VehicleStatus) error {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Api-Key", c.apiKey)
 
-	res, err := c.HTTPClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -102,12 +104,9 @@ func (c *Client) sendRequest(req *http.Request, vehicleStatus *VehicleStatus) er
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("HTTP %d: %s", res.StatusCode, res.Body)
+		body, _ := ioutil.ReadAll(res.Body)
+		return fmt.Errorf("HTTP %d: %s", res.StatusCode, body)
 	}
 
-	if err = json.NewDecoder(res.Body).Decode(&vehicleStatus); err != nil {
-		return err
-	}
-
-	return nil
+	return json.NewDecoder(res.Body).Decode(&vehicleStatus)
 }
