@@ -70,9 +70,9 @@ func TestGetVehicleHistory(t *testing.T) {
 						"motTestNumber":"901662956826",
 						"odometerResultType":"READ",
 						"rfrAndComments":[{
-							"text":"Nearside Front Track rod end ball joint dust cover damaged or deteriorated, but preventing the ingress of dirt (2.1.3 (g) (i))",
-							"type":"MINOR","
-							dangerous":false
+							"text":"Nearside Front Track rod end ball joint dust cover damaged or  deteriorated, but preventing the ingress of dirt (2.1.3 (g) (i))",
+							"type":"MINOR",
+							"dangerous":false
 						}]
 					}]
 				}]`,
