@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"log"
+	"time"
 
 	"github.com/darkphnx/vehiclemanager/internal/models"
 	"github.com/darkphnx/vehiclemanager/internal/mothistoryapi"
@@ -40,6 +41,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("%+v\n", vehicleStatus)
-	log.Printf("%s", prettyPrint(vehicleHistory))
+	vehicle := models.Vehicle{
+		RegistrationNumber: vehicleStatus.RegistrationNumber,
+		Manufacturer:       vehicleHistory.Make,
+		Model:              vehicleHistory.Model,
+		MotDue:             time.Unix(vehicleHistory.MotTests[0].ExpiryDate.Unix(), 0),
+		VEDDue:             time.Unix(vehicleStatus.TaxDueDate.Unix(), 0),
+	}
+
+	log.Printf("%s", prettyPrint(vehicle))
+
+	err = models.CreateVehicle(&vehicle)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

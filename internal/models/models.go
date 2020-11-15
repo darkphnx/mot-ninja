@@ -1,29 +1,23 @@
 package models
 
 import (
-	"context"
+	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var ctx = context.TODO()
-var database *mongo.Database
+// Vehicle is a model of a vehicle inclusive of history that can be written to the database
+type Vehicle struct {
+	ID                 primitive.ObjectID `bson:"_id"`
+	RegistrationNumber string             `bson:"registration_number"`
+	Manufacturer       string             `bson:"manufacturer"`
+	Model              string             `bson:"model"`
+	MotDue             time.Time          `bson:"mot_due"`
+	VEDDue             time.Time          `bson:"ved_due"`
+}
 
-// InitDB establishes a database connection to Mongo
-func InitDB(connectionString string) error {
-	clientOptions := options.Client().ApplyURI(connectionString)
-	db, err := mongo.Connect(ctx, clientOptions)
-	if err != nil {
-		return err
-	}
-
-	err = db.Ping(ctx, nil)
-	if err != nil {
-		return err
-	}
-
-	database = db.Database("vehicle-manager")
-
-	return nil
+// CreateVehicle writes a Vehicle struct to the database
+func CreateVehicle(vehicle *Vehicle) error {
+	_, err := collections.Vehicles.InsertOne(ctx, vehicle)
+	return err
 }
