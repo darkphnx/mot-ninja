@@ -61,7 +61,7 @@ type MotTest struct {
 	ExpiryDate         DottedDate      `json:"expiryDate,omitempty"`
 	OdometerValue      int             `json:"odometerValue,string"`
 	OdometerUnit       string          `json:"odometerUnit,omitempty"`
-	MotTestNumber      string          `json:"motTestNumber"`
+	MotTestNumber      int             `json:"motTestNumber,string"`
 	OdometerResultType string          `json:"odometerResultType"`
 	RfrAndComments     []RfrAndComment `json:"rfrAndComments"`
 }

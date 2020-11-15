@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"log"
-	"time"
 
 	"github.com/darkphnx/vehiclemanager/internal/models"
 	"github.com/darkphnx/vehiclemanager/internal/mothistoryapi"
@@ -41,19 +40,40 @@ func main() {
 		log.Fatal(err)
 	}
 
+	var motHistory []models.MOTTest
+	for _, apiTest := range vehicleHistory.MotTests {
+		var comments []models.RfrAndComments
+		for _, apiComment := range apiTest.RfrAndComments {
+			comment := models.RfrAndComments{
+				Comment: apiComment.Text,
+				Type:    apiComment.Type,
+			}
+			comments = append(comments, comment)
+		}
+
+		test := models.MOTTest{
+			TestNumber:     apiTest.MotTestNumber,
+			Passed:         apiTest.TestResult == "PASSED",
+			CompletedDate:  apiTest.CompletedDate.Time,
+			RfrAndComments: comments,
+		}
+
+		motHistory = append(motHistory, test)
+	}
+
 	vehicle := models.Vehicle{
 		RegistrationNumber: vehicleStatus.RegistrationNumber,
 		Manufacturer:       vehicleHistory.Make,
 		Model:              vehicleHistory.Model,
-		MotDue:             time.Unix(vehicleHistory.MotTests[0].ExpiryDate.Unix(), 0),
-		VEDDue:             time.Unix(vehicleStatus.TaxDueDate.Unix(), 0),
+		MotDue:             vehicleHistory.MotTests[0].ExpiryDate.Time,
+		VEDDue:             vehicleStatus.TaxDueDate.Time,
+		MOTHistory:         motHistory,
 	}
-
-	log.Printf("%s", prettyPrint(vehicle))
 
 	err = models.CreateVehicle(&vehicle)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	log.Printf("%s", prettyPrint(vehicle))
 }

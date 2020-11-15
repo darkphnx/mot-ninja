@@ -14,10 +14,31 @@ type Vehicle struct {
 	Model              string             `bson:"model"`
 	MotDue             time.Time          `bson:"mot_due"`
 	VEDDue             time.Time          `bson:"ved_due"`
+	MOTHistory         []MOTTest          `bson:"mot_history"`
+	CreatedAt          time.Time          `bson:"created_at"`
+	UpdatedAt          time.Time          `bson:"updated_at"`
+}
+
+// MOTTest that can be written to database
+type MOTTest struct {
+	TestNumber     int              `bson:"test_number"`
+	Passed         bool             `bson:"passed"`
+	CompletedDate  time.Time        `bson:"completed_date"`
+	RfrAndComments []RfrAndComments `bson:"rfr_and_comments"`
+}
+
+// RfrAndComments contains the reasons for failure in a MOT
+type RfrAndComments struct {
+	Comment string `bson:"comment"`
+	Type    string `bson:"type"`
 }
 
 // CreateVehicle writes a Vehicle struct to the database
 func CreateVehicle(vehicle *Vehicle) error {
+	vehicle.ID = primitive.NewObjectID()
+	vehicle.CreatedAt = time.Now()
+	vehicle.UpdatedAt = time.Now()
+
 	_, err := collections.Vehicles.InsertOne(ctx, vehicle)
 	return err
 }
