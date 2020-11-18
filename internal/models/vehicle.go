@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -41,4 +42,33 @@ func CreateVehicle(vehicle *Vehicle) error {
 
 	_, err := collections.Vehicles.InsertOne(ctx, vehicle)
 	return err
+}
+
+// GetVehicles fetches all vehicles
+func GetVehicles() ([]*Vehicle, error) {
+	var vehicles []*Vehicle
+
+	cur, err := collections.Vehicles.Find(ctx, bson.D{{}})
+	if err != nil {
+		return vehicles, err
+	}
+
+	for cur.Next(ctx) {
+		var vehicle Vehicle
+
+		err := cur.Decode(&vehicle)
+		if err != nil {
+			return vehicles, err
+		}
+
+		vehicles = append(vehicles, &vehicle)
+	}
+
+	if err = cur.Err(); err != nil {
+		return vehicles, err
+	}
+
+	cur.Close(ctx)
+
+	return vehicles, nil
 }

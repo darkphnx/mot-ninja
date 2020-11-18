@@ -33,6 +33,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/vehicle/create", vehicleCreate(&env))
+	mux.Handle("/vehicles", vehicleList(&env))
 
 	err = http.ListenAndServe(":4000", mux)
 	log.Fatal(err)

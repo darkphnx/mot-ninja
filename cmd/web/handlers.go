@@ -72,3 +72,15 @@ func vehicleCreate(env *Env) http.HandlerFunc {
 		json.NewEncoder(w).Encode(vehicle)
 	}
 }
+
+func vehicleList(env *Env) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vehicles, err := models.GetVehicles()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(vehicles)
+	}
+}
