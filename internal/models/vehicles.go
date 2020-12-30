@@ -34,21 +34,23 @@ type RfrAndComments struct {
 	Type    string `bson:"type"`
 }
 
+var collectionName = "vehicles"
+
 // CreateVehicle writes a Vehicle struct to the database
-func CreateVehicle(vehicle *Vehicle) error {
+func CreateVehicle(db *Database, vehicle *Vehicle) error {
 	vehicle.ID = primitive.NewObjectID()
 	vehicle.CreatedAt = time.Now()
 	vehicle.UpdatedAt = time.Now()
 
-	_, err := collections.Vehicles.InsertOne(ctx, vehicle)
+	_, err := db.Collection(collectionName).InsertOne(ctx, vehicle)
 	return err
 }
 
 // GetVehicles fetches all vehicles
-func GetVehicles() ([]*Vehicle, error) {
+func GetVehicles(db *Database) ([]*Vehicle, error) {
 	var vehicles []*Vehicle
 
-	cur, err := collections.Vehicles.Find(ctx, bson.D{{}})
+	cur, err := db.Collection(collectionName).Find(ctx, bson.D{{}})
 	if err != nil {
 		return vehicles, err
 	}

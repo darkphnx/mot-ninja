@@ -10,8 +10,9 @@ import (
 	"github.com/darkphnx/vehiclemanager/internal/vesapi"
 )
 
-// Env contains items for DI into handlers
-type Env struct {
+// Server contains items for DI into handlers
+type Server struct {
+	Database                 *models.Database
 	VehicleEnquiryServiceAPI *vesapi.Client
 	MotHistoryAPI            *mothistoryapi.Client
 }
@@ -21,19 +22,20 @@ func main() {
 	mothistoryapiKey := flag.String("mothistoryapi-key", "", "MOT History API Key")
 	flag.Parse()
 
-	err := models.InitDB("mongodb://localhost:27017")
+	database, err := models.InitDB("mongodb://localhost:27017")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	env := Env{
+	server := Server{
+		Database:                 database,
 		VehicleEnquiryServiceAPI: vesapi.NewClient(*vesapiKey, ""),
 		MotHistoryAPI:            mothistoryapi.NewClient(*mothistoryapiKey, ""),
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle("/vehicle/create", vehicleCreate(&env))
-	mux.Handle("/vehicles", vehicleList(&env))
+	mux.Handle("/vehicle/create", vehicleCreate(&server))
+	mux.Handle("/vehicles", vehicleList(&server))
 
 	err = http.ListenAndServe(":4000", mux)
 	log.Fatal(err)

@@ -8,25 +8,28 @@ import (
 )
 
 var ctx = context.TODO()
-var collections struct {
-	Vehicles *mongo.Collection
+
+// Database wraps a mongo connection and adds convenience features
+type Database struct {
+	*mongo.Database
 }
 
 // InitDB establishes a database connection to Mongo
-func InitDB(connectionString string) error {
+func InitDB(connectionString string) (*Database, error) {
 	clientOptions := options.Client().ApplyURI(connectionString)
 	db, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = db.Ping(ctx, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	database := db.Database("vehicle-manager")
-	collections.Vehicles = database.Collection("vehicles")
+	database := Database{
+		db.Database("vehicle-manager"),
+	}
 
-	return nil
+	return &database, nil
 }

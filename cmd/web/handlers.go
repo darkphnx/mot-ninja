@@ -11,7 +11,7 @@ type vehicleRequestPayload struct {
 	RegistrationNumber string
 }
 
-func vehicleCreate(env *Env) http.HandlerFunc {
+func vehicleCreate(server *Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var payload vehicleRequestPayload
 
@@ -21,13 +21,13 @@ func vehicleCreate(env *Env) http.HandlerFunc {
 			return
 		}
 
-		vehicleStatus, err := env.VehicleEnquiryServiceAPI.GetVehicleStatus(payload.RegistrationNumber)
+		vehicleStatus, err := server.VehicleEnquiryServiceAPI.GetVehicleStatus(payload.RegistrationNumber)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		vehicleHistory, err := env.MotHistoryAPI.GetVehicleHistory(payload.RegistrationNumber)
+		vehicleHistory, err := server.MotHistoryAPI.GetVehicleHistory(payload.RegistrationNumber)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -63,7 +63,7 @@ func vehicleCreate(env *Env) http.HandlerFunc {
 			MOTHistory:         motHistory,
 		}
 
-		err = models.CreateVehicle(&vehicle)
+		err = models.CreateVehicle(server.Database, &vehicle)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 			return
@@ -73,9 +73,9 @@ func vehicleCreate(env *Env) http.HandlerFunc {
 	}
 }
 
-func vehicleList(env *Env) http.HandlerFunc {
+func vehicleList(server *Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vehicles, err := models.GetVehicles()
+		vehicles, err := models.GetVehicles(server.Database)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
