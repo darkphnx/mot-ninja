@@ -105,7 +105,7 @@ func TestGetVehicleHistory(t *testing.T) {
 						},
 						OdometerValue:      200413,
 						OdometerUnit:       "mi",
-						MotTestNumber:      "901662956826",
+						MotTestNumber:      901662956826,
 						OdometerResultType: "READ",
 						RfrAndComments: []RfrAndComment{
 							RfrAndComment{

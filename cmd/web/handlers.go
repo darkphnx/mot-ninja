@@ -69,18 +69,20 @@ func vehicleCreate(server *Server) http.HandlerFunc {
 			return
 		}
 
+		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(vehicle)
 	}
 }
 
 func vehicleList(server *Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vehicles, err := models.GetVehicles(server.Database)
+		vehicles, err := models.GetAllVehicles(server.Database)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
+		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(vehicles)
 	}
 }

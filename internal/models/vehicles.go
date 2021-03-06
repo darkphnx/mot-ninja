@@ -46,31 +46,25 @@ func CreateVehicle(db *Database, vehicle *Vehicle) error {
 	return err
 }
 
-// GetVehicles fetches all vehicles
-func GetVehicles(db *Database) ([]*Vehicle, error) {
+// GetAllVehicles fetches all vehicles
+func GetAllVehicles(db *Database) ([]*Vehicle, error) {
+	query := bson.M{}
+
+	return getVehicles(db, query)
+}
+
+func getVehicles(db *Database, query bson.M) ([]*Vehicle, error) {
 	var vehicles []*Vehicle
 
-	cur, err := db.Collection(collectionName).Find(ctx, bson.D{{}})
+	cur, err := db.Collection(collectionName).Find(ctx, query)
 	if err != nil {
 		return vehicles, err
 	}
 
-	for cur.Next(ctx) {
-		var vehicle Vehicle
-
-		err := cur.Decode(&vehicle)
-		if err != nil {
-			return vehicles, err
-		}
-
-		vehicles = append(vehicles, &vehicle)
-	}
-
-	if err = cur.Err(); err != nil {
+	err = cur.All(ctx, &vehicles)
+	if err != nil {
 		return vehicles, err
 	}
-
-	cur.Close(ctx)
 
 	return vehicles, nil
 }

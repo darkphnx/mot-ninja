@@ -33,10 +33,16 @@ func main() {
 		MotHistoryAPI:            mothistoryapi.NewClient(*mothistoryapiKey, ""),
 	}
 
+	staticFiles := http.FileServer(http.Dir("./ui/public"))
+
 	mux := http.NewServeMux()
 	mux.Handle("/vehicle/create", vehicleCreate(&server))
 	mux.Handle("/vehicles", vehicleList(&server))
+	mux.Handle("/", staticFiles)
 
-	err = http.ListenAndServe(":4000", mux)
+	loggingMiddleware := RequestLoggingMiddleware()
+	loggedMux := loggingMiddleware(mux)
+
+	err = http.ListenAndServe(":4000", loggedMux)
 	log.Fatal(err)
 }
