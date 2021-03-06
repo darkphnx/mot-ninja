@@ -7,10 +7,14 @@ export default function VehicleList() {
   const [vehicles, setVehicles] = useState([]);
 
   useEffect(()=> {
-    fetch('/vehicles', { 'method' : 'get' })
+    fetch('/vehicles', { method: 'GET' })
       .then(response => response.json())
-      .then(vehicles => setVehicles(vehicles))
+      .then(vehicles => setVehicles(vehicles));
   }, []);
+
+  function handleOnVheicleAdded(addedVehicle) {
+    setVehicles([...vehicles, addedVehicle]);
+  }
 
   return(
     <div className="container">
@@ -19,7 +23,7 @@ export default function VehicleList() {
           <h1>Your Vehicles</h1>
         </div>
         <div className='column'>
-          <AddVehicleForm/>
+          <AddVehicleForm onVehicleAdded={handleOnVheicleAdded} />
         </div>
       </div>
 
@@ -30,15 +34,34 @@ export default function VehicleList() {
   )
 }
 
-function AddVehicleForm() {
+function AddVehicleForm({ onVehicleAdded }) {
+  const [registrationNumber, setRegistrationNumber] = useState("")
+
+  function handleRegistrationNumber(e) {
+    setRegistrationNumber(e.target.value);
+  }
+
+  function submitForm(e) {
+    fetch('/vehicle/create', {
+      method: 'POST',
+      body: JSON.stringify({ "RegistrationNumber" : registrationNumber })
+    }).then(response => response.json())
+      .then(vehicle => onVehicleAdded(vehicle))
+  }
+
+  function handleVehicleAdded(vehicle) {
+    onVehicleAdded(vehicle);
+    setRegistrationNumber("");
+  }
+
   return (
     <div className='row add-vehicle'>
       <div className='column'>
-        <input type='text' id='registration-number' placeholder='Registration Number' />
+        <input type='text' id='registration-number' placeholder='Registration Number' value={registrationNumber} onChange={handleRegistrationNumber}/>
       </div>
 
       <div className='column add-vehicle-submit'>
-        <a href='#' className='button'>Add Vehicle</a>
+        <a href='#' className='button' onClick={submitForm}>Add Vehicle</a>
       </div>
     </div>
   )
@@ -57,7 +80,7 @@ function VehicleTable({vehicles}) {
         <tr>
           <th>Registration</th>
           <th>Make/Model</th>
-          <th>MOT Status</th>
+          <th>MOT Due</th>
           <th>Advisories</th>
         </tr>
       </thead>
@@ -98,7 +121,7 @@ function Vehicle({ ID, RegistrationNumber, Manufacturer, Model, MotDue, VEDDue, 
   const latestMOT = findLatestMOT();
 
   function advisoryCount() {
-    if(latestMOT != null) {
+    if(latestMOT != null && latestMOT.RfrAndComments != null) {
       const advisories = latestMOT.RfrAndComments.filter(comment => comment.Type === 'MINOR')
 
       return advisories.length;
