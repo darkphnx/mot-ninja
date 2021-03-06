@@ -2,7 +2,8 @@ import './App.css';
 import {
   BrowserRouter as Router,
   Switch,
-  Route
+  Route,
+  Link
 } from "react-router-dom";
 import VehicleList from './components/VehicleList';
 import VehicleHistory from './components/VehicleHistory';
@@ -10,11 +11,14 @@ import VehicleHistory from './components/VehicleHistory';
 function App() {
   return (
     <Router>
-      <div className="container">
-        <div className="row">
-          <h1>MOT Minder</h1>
-        </div>
-        <div className="row">
+      <div className="wrapper">
+        <nav className="navigation">
+          <div className="container">
+            <Link to="/" className="navigation-title">MOT Minder</Link>
+          </div>
+        </nav>
+
+        <main className="content">
           <Switch>
             <Route path="/:id">
               <VehicleHistory />
@@ -23,7 +27,7 @@ function App() {
               <VehicleList />
             </Route>
           </Switch>
-        </div>
+        </main>
       </div>
     </Router>
   );

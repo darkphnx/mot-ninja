@@ -4,7 +4,42 @@ import moment from 'moment';
 import { Link } from "react-router-dom";
 
 export default function VehicleList() {
-  const [vehicles, setVehicles] = useState([])
+  const [addFormVisible, setAddFormVisible] = useState(true);
+
+  return(
+    <div className="container">
+      <div className='row title-row'>
+        <div className='column'>
+          <h1>Your Vehicles</h1>
+        </div>
+        <div className='column'>
+          <AddVehicleForm/>
+        </div>
+      </div>
+
+      <div class='row'>
+        <VehicleTable />
+      </div>
+    </div>
+  )
+}
+
+function AddVehicleForm() {
+  return (
+    <div className='row add-vehicle'>
+      <div className='column'>
+        <input type='text' id='registration-number' placeholder='Registration Number' />
+      </div>
+
+      <div className='column add-vehicle-submit'>
+        <a href='#' className='button'>Add Vehicle</a>
+      </div>
+    </div>
+  )
+}
+
+function VehicleTable() {
+  const [vehicles, setVehicles] = useState([]);
 
   useEffect(()=> {
     fetch('/vehicles', { 'method' : 'get' })
@@ -24,7 +59,6 @@ export default function VehicleList() {
         <tr>
           <th>Registration</th>
           <th>Make/Model</th>
-          <th>VED Status</th>
           <th>MOT Status</th>
           <th>Advisories</th>
         </tr>
@@ -80,7 +114,6 @@ function Vehicle({ ID, RegistrationNumber, Manufacturer, Model, MotDue, VEDDue, 
         <Link to={"/" + ID}>{RegistrationNumber}</Link>
       </td>
       <td>{Manufacturer} {Model}</td>
-      <td>{expiredOrDue(VEDDue)} <Moment format='DD/MM/YYYY'>{VEDDue}</Moment></td>
       <td>{expiredOrDue(MotDue)} <Moment format='DD/MM/YYYY'>{MotDue}</Moment></td>
       <td>{advisoryCount()}</td>
     </tr>

@@ -33,7 +33,7 @@ func main() {
 		MotHistoryAPI:            mothistoryapi.NewClient(*mothistoryapiKey, ""),
 	}
 
-	staticFiles := http.FileServer(http.Dir("./ui/public"))
+	staticFiles := http.FileServer(http.Dir("./ui/build"))
 
 	mux := http.NewServeMux()
 	mux.Handle("/vehicle/create", vehicleCreate(&server))
