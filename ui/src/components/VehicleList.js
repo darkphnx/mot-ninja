@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import Moment from 'react-moment';
 import moment from 'moment';
+import { Link } from "react-router-dom";
 
-export function VehicleList() {
+export default function VehicleList() {
   const [vehicles, setVehicles] = useState([])
 
   useEffect(()=> {
@@ -18,13 +19,24 @@ export function VehicleList() {
   }
 
   return(
-    <div className='vehicleList'>
-      {vehicleComponents()}
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Registration</th>
+          <th>Make/Model</th>
+          <th>VED Status</th>
+          <th>MOT Status</th>
+          <th>Advisories</th>
+        </tr>
+      </thead>
+      <tbody>
+        {vehicleComponents()}
+      </tbody>
+    </table>
   )
 }
 
-function Vehicle({RegistrationNumber, Manufacturer, Model, MotDue, VEDDue, MOTHistory}) {
+function Vehicle({ ID, RegistrationNumber, Manufacturer, Model, MotDue, VEDDue, MOTHistory }) {
   function expiredOrDue(timestamp) {
     if(moment(timestamp).isBefore(moment())){
       return 'Expired';
@@ -33,7 +45,7 @@ function Vehicle({RegistrationNumber, Manufacturer, Model, MotDue, VEDDue, MOTHi
     }
   }
 
-  function latestMOT() {
+  function findLatestMOT() {
     if(MOTHistory == null) {
       return null;
     }
@@ -51,29 +63,26 @@ function Vehicle({RegistrationNumber, Manufacturer, Model, MotDue, VEDDue, MOTHi
     return sortedHistory[0];
   }
 
-  function advisoryCount() {
-    const latest = latestMOT();
+  const latestMOT = findLatestMOT();
 
-    if(latest != null) {
-      const advisories = latest.RfrAndComments.filter(comment => comment.Type === 'MINOR')
+  function advisoryCount() {
+    if(latestMOT != null) {
+      const advisories = latestMOT.RfrAndComments.filter(comment => comment.Type === 'MINOR')
 
       return advisories.length;
     }
   }
 
+
   return(
-    <div className = 'vehicle'>
-      <h2>{RegistrationNumber}</h2>
-      <h3>{Manufacturer}</h3>
-      <h3>{Model}</h3>
-      <dl>
-        <dt>VED Status</dt>
-        <dd>{expiredOrDue(VEDDue)} <Moment format='DD/MM/YYYY'>{VEDDue}</Moment></dd>
-        <dt>MOT Status</dt>
-        <dd>{expiredOrDue(MotDue)} <Moment format='DD/MM/YYYY'>{MotDue}</Moment></dd>
-        <dt>Advisory Count</dt>
-        <dd>{advisoryCount()}</dd>
-      </dl>
-    </div>
+    <tr>
+      <td>
+        <Link to={"/" + ID}>{RegistrationNumber}</Link>
+      </td>
+      <td>{Manufacturer} {Model}</td>
+      <td>{expiredOrDue(VEDDue)} <Moment format='DD/MM/YYYY'>{VEDDue}</Moment></td>
+      <td>{expiredOrDue(MotDue)} <Moment format='DD/MM/YYYY'>{MotDue}</Moment></td>
+      <td>{advisoryCount()}</td>
+    </tr>
   );
 }
