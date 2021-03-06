@@ -4,7 +4,13 @@ import moment from 'moment';
 import { Link } from "react-router-dom";
 
 export default function VehicleList() {
-  const [addFormVisible, setAddFormVisible] = useState(true);
+  const [vehicles, setVehicles] = useState([]);
+
+  useEffect(()=> {
+    fetch('/vehicles', { 'method' : 'get' })
+      .then(response => response.json())
+      .then(vehicles => setVehicles(vehicles))
+  }, []);
 
   return(
     <div className="container">
@@ -18,7 +24,7 @@ export default function VehicleList() {
       </div>
 
       <div class='row'>
-        <VehicleTable />
+        <VehicleTable vehicles={vehicles}/>
       </div>
     </div>
   )
@@ -38,15 +44,7 @@ function AddVehicleForm() {
   )
 }
 
-function VehicleTable() {
-  const [vehicles, setVehicles] = useState([]);
-
-  useEffect(()=> {
-    fetch('/vehicles', { 'method' : 'get' })
-      .then(response => response.json())
-      .then(vehicles => setVehicles(vehicles))
-  }, []);
-
+function VehicleTable({vehicles}) {
   function vehicleComponents() {
     return vehicles.map((vehicle, i) => {
       return(<Vehicle key={vehicle.ID} {...vehicle} />);
