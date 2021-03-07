@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 
 export default function VehicleList() {
   const [vehicles, setVehicles] = useState([]);
+  const [searchFilter, setSearchFilter] = useState("");
 
   useEffect(()=> {
     fetch('/vehicles', { method: 'GET' })
@@ -12,8 +13,28 @@ export default function VehicleList() {
       .then(vehicles => setVehicles(vehicles));
   }, []);
 
-  function handleOnVheicleAdded(addedVehicle) {
+  function handleOnVehicleAdded(addedVehicle) {
     setVehicles([...vehicles, addedVehicle]);
+  }
+
+  function handleSearchQueryUpdated(newSearchQuery) {
+    setSearchFilter(newSearchQuery);
+  }
+
+  // TODO: Replace with a proper database search
+  function filteredVehicles() {
+    if(searchFilter === "") {
+      return vehicles;
+    } else {
+      const filter = searchFilter.toLowerCase();
+      const searchFields = ['RegistrationNumber', 'Manufacturer', 'Model'];
+
+      return vehicles.filter(vehicle => {
+        return searchFields.some(field => {
+          return vehicle[field].toLowerCase().startsWith(filter);
+        });
+      });
+    }
   }
 
   return(
@@ -23,15 +44,40 @@ export default function VehicleList() {
           <h1>Your Vehicles</h1>
         </div>
         <div className='column'>
-          <AddVehicleForm onVehicleAdded={handleOnVheicleAdded} />
+          <SearchVehicleForm onSearchUpdate={handleSearchQueryUpdated} />
         </div>
       </div>
 
-      <div class='row'>
-        <VehicleTable vehicles={vehicles}/>
+      <div className='row vehicle-list-content'>
+        <div className='column'>
+          <VehicleTable vehicles={filteredVehicles()}/>
+        </div>
+
+        <div className='column add-vehicle'>
+          <h4>Add a new vehicle</h4>
+          <AddVehicleForm onVehicleAdded={handleOnVehicleAdded} />
+          <p>You may monitor up to five vehicles.</p>
+        </div>
       </div>
     </div>
   )
+}
+
+function SearchVehicleForm({ onSearchUpdate }) {
+  const [searchQuery, setSearchQuery] = useState("")
+
+  function handleSearchQuery(e) {
+    setSearchQuery(e.target.value);
+    onSearchUpdate(e.target.value);
+  }
+
+  return (
+    <div className='row search-vehicle'>
+      <div className='column'>
+        <input type='text' id='query' placeholder='Search Registration/Make/Model' value={searchQuery} onChange={handleSearchQuery}/>
+      </div>
+    </div>
+  );
 }
 
 function AddVehicleForm({ onVehicleAdded }) {
@@ -46,7 +92,7 @@ function AddVehicleForm({ onVehicleAdded }) {
       method: 'POST',
       body: JSON.stringify({ "RegistrationNumber" : registrationNumber })
     }).then(response => response.json())
-      .then(vehicle => onVehicleAdded(vehicle))
+      .then(vehicle => handleVehicleAdded(vehicle))
   }
 
   function handleVehicleAdded(vehicle) {
@@ -55,12 +101,12 @@ function AddVehicleForm({ onVehicleAdded }) {
   }
 
   return (
-    <div className='row add-vehicle'>
+    <div className='row add-vehicle-form'>
       <div className='column'>
         <input type='text' id='registration-number' placeholder='Registration Number' value={registrationNumber} onChange={handleRegistrationNumber}/>
       </div>
 
-      <div className='column add-vehicle-submit'>
+      <div className='column'>
         <a href='#' className='button' onClick={submitForm}>Add Vehicle</a>
       </div>
     </div>
@@ -125,6 +171,8 @@ function Vehicle({ ID, RegistrationNumber, Manufacturer, Model, MotDue, VEDDue, 
       const advisories = latestMOT.RfrAndComments.filter(comment => comment.Type === 'MINOR')
 
       return advisories.length;
+    } else {
+      return 0;
     }
   }
 

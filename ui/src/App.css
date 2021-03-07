@@ -31,7 +31,7 @@
 }
 
 .content > .container {
-  padding: 5rem 0 5rem 0;
+  padding-top: 5rem;
 }
 
 .row.title-row {
@@ -39,16 +39,32 @@
   flex-direction: column;
 }
 
-.title-row .row.add-vehicle {
+.title-row .row.search-vehicle {
   flex-direction: row;
 }
 
-.row .column .add-vehicle-submit {
+.row .column .search-vehicle-submit {
   width: auto;
+}
+
+.row.vehicle-list-content {
+  flex-direction: column;
 }
 
 @media (min-width: 80.0rem) {
   .row.title-row {
     flex-direction: row;
+  }
+
+  .row.vehicle-list-content {
+    flex-direction: row;
+  }
+
+  .row.vehicle-list-content .add-vehicle {
+    flex: 0 0 20%;
+  }
+
+  .row.vehicle-list-content .row.add-vehicle-form {
+    flex-direction: column;
   }
 }
