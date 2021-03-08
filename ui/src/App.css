@@ -51,6 +51,43 @@
   flex-direction: column;
 }
 
+.row.mot-test {
+  flex-direction: column;
+
+  padding: 2.5rem 0 2.5rem 0;
+  border-top: 1px solid #d1d1d1;
+}
+
+.row.mot-test .column.pass-fail {
+  text-align: center;
+  text-transform: uppercase;
+  align-self: center;
+}
+
+.row.mot-test .column.pass-fail h4 {
+  font-weight: bold;
+}
+
+.row.mot-test .column.pass-fail h4.pass {
+  color: #006400;
+}
+
+.row.mot-test .column.pass-fail h4.fail {
+  color: #8B0000;
+}
+
+.row.comments-list label {
+  margin-top: 1rem;
+}
+
+.row.comments-list ul {
+  margin-bottom: 0;
+}
+
+.row.comments-list ul li:last-child {
+  margin-bottom: 0;
+}
+
 @media (min-width: 80.0rem) {
   .row.title-row {
     flex-direction: row;
@@ -58,6 +95,14 @@
 
   .row.vehicle-list-content {
     flex-direction: row;
+  }
+
+  .row.mot-test {
+    flex-direction: row;
+  }
+
+  .row.mot-test .column.pass-fail {
+    flex: 0 0 20rem;
   }
 
   .row.vehicle-list-content .add-vehicle {

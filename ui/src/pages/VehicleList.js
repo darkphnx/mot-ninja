@@ -180,7 +180,7 @@ function Vehicle({ ID, RegistrationNumber, Manufacturer, Model, MotDue, VEDDue, 
   return(
     <tr>
       <td>
-        <Link to={"/" + ID}>{RegistrationNumber}</Link>
+        <Link to={"/" + RegistrationNumber}>{RegistrationNumber}</Link>
       </td>
       <td>{Manufacturer} {Model}</td>
       <td>{expiredOrDue(MotDue)} <Moment format='DD/MM/YYYY'>{MotDue}</Moment></td>

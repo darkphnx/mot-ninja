@@ -5,8 +5,8 @@ import {
   Route,
   Link
 } from "react-router-dom";
-import VehicleList from './components/VehicleList';
-import VehicleHistory from './components/VehicleHistory';
+import VehicleList from './pages/VehicleList';
+import VehicleHistory from './pages/VehicleHistory';
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
 
         <main className="content">
           <Switch>
-            <Route path="/:id">
+            <Route path="/:registrationNumber">
               <VehicleHistory />
             </Route>
             <Route path="/">
