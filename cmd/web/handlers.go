@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/darkphnx/vehiclemanager/internal/models"
@@ -45,10 +46,12 @@ func vehicleCreate(server *Server) http.HandlerFunc {
 			}
 
 			test := models.MOTTest{
-				TestNumber:     apiTest.MotTestNumber,
-				Passed:         apiTest.TestResult == "PASSED",
-				CompletedDate:  apiTest.CompletedDate.Time,
-				RfrAndComments: comments,
+				TestNumber:      apiTest.MotTestNumber,
+				Passed:          apiTest.TestResult == "PASSED",
+				CompletedDate:   apiTest.CompletedDate.Time,
+				ExpiryDate:      apiTest.ExpiryDate.Time,
+				OdometerReading: fmt.Sprintf("%d %s", apiTest.OdometerValue, apiTest.OdometerUnit),
+				RfrAndComments:  comments,
 			}
 
 			motHistory = append(motHistory, test)
@@ -85,4 +88,32 @@ func vehicleList(server *Server) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(vehicles)
 	}
+}
+
+type singleVehicleRequestPayload struct {
+	ID string
+}
+
+func vehicleDelete(server *Server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var payload models.Vehicle
+
+		err := json.NewDecoder(r.Body).Decode(&payload)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		err = models.DeleteVehicle(server.Database, &payload)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func staticFiles() http.Handler {
+	return http.FileServer(http.Dir("./ui/build"))
 }

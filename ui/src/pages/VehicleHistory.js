@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useParams } from "react-router-dom";
+import { useParams, Redirect } from "react-router-dom";
 import Moment from 'react-moment';
 
 export default function VehicleHistory() {
   const { registrationNumber } = useParams();
   const [vehicle, setVehicle] = useState(null);
+  const [redirectBack, setRedirectBack] = useState(false);
 
   useEffect(()=> {
     fetch('/vehicles', { 'method' : 'get' })
@@ -25,6 +26,17 @@ export default function VehicleHistory() {
     }
   }
 
+  function handleDeleteVehicle(e) {
+    fetch('/vehicle/delete', {
+      method: 'DELETE',
+      body: JSON.stringify({ ID: vehicle.ID })
+    }).then(()=> setRedirectBack(true));
+  }
+
+  if (redirectBack) {
+    return(<Redirect to='/' />);
+  }
+
   return(
     <div className='container'>
       <div className='row title-row'>
@@ -37,6 +49,12 @@ export default function VehicleHistory() {
       </div>
 
       {MOTs()}
+
+      <div className='row'>
+        <div className='column'>
+          <button className='button button-outline' onClick={handleDeleteVehicle}>Delete Vehicle</button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -61,7 +79,7 @@ const commentTypes = {
 };
 const commentTypeOrder = Object.keys(commentTypes);
 
-function MOTTest({ Passed, Mileage, ExpiryDate, CompletedDate, RfrAndComments }) {
+function MOTTest({ Passed, OdometerReading, ExpiryDate, CompletedDate, RfrAndComments }) {
   const commentsByType = (RfrAndComments || [])
     .sort((a, b) => commentTypeOrder.indexOf(a.Type) - commentTypeOrder.indexOf(b.Type))
     .reduce((accumulator, comment) => {
@@ -92,7 +110,7 @@ function MOTTest({ Passed, Mileage, ExpiryDate, CompletedDate, RfrAndComments })
           </div>
           <div className='column'>
             <label>Mileage</label>
-            {Mileage}
+            {OdometerReading}
           </div>
           <div className='column'>
             <label>Expiry Date</label>

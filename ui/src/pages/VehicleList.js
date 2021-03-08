@@ -10,7 +10,7 @@ export default function VehicleList() {
   useEffect(()=> {
     fetch('/vehicles', { method: 'GET' })
       .then(response => response.json())
-      .then(vehicles => setVehicles(vehicles));
+      .then(vehicles => setVehicles(vehicles || []));
   }, []);
 
   function handleOnVehicleAdded(addedVehicle) {
@@ -113,9 +113,9 @@ function AddVehicleForm({ onVehicleAdded }) {
   )
 }
 
-function VehicleTable({vehicles}) {
+function VehicleTable({ vehicles }) {
   function vehicleComponents() {
-    return vehicles.map((vehicle, i) => {
+    return (vehicles).map((vehicle, i) => {
       return(<Vehicle key={vehicle.ID} {...vehicle} />);
     })
   }

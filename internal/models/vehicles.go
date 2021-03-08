@@ -22,10 +22,12 @@ type Vehicle struct {
 
 // MOTTest that can be written to database
 type MOTTest struct {
-	TestNumber     int              `bson:"test_number"`
-	Passed         bool             `bson:"passed"`
-	CompletedDate  time.Time        `bson:"completed_date"`
-	RfrAndComments []RfrAndComments `bson:"rfr_and_comments"`
+	TestNumber      int              `bson:"test_number"`
+	Passed          bool             `bson:"passed"`
+	CompletedDate   time.Time        `bson:"completed_date"`
+	ExpiryDate      time.Time        `bson:"expiry_date"`
+	OdometerReading string           `bson:"odometer_reading"`
+	RfrAndComments  []RfrAndComments `bson:"rfr_and_comments"`
 }
 
 // RfrAndComments contains the reasons for failure in a MOT
@@ -43,6 +45,13 @@ func CreateVehicle(db *Database, vehicle *Vehicle) error {
 	vehicle.UpdatedAt = time.Now()
 
 	_, err := db.Collection(collectionName).InsertOne(ctx, vehicle)
+	return err
+}
+
+// DeleteVehicle deletes a vehicle from the database
+func DeleteVehicle(db *Database, vehicle *Vehicle) error {
+	_, err := db.Collection(collectionName).DeleteOne(ctx, bson.M{"_id": primitive.ObjectID(vehicle.ID)})
+
 	return err
 }
 
