@@ -33,6 +33,8 @@ func main() {
 		MotHistoryAPI:            mothistoryapi.NewClient(*mothistoryapiKey, ""),
 	}
 
+	go BackgroundUpdateVehicles(&server)
+
 	mux := http.NewServeMux()
 	mux.Handle("/vehicle/create", vehicleCreate(&server))
 	mux.Handle("/vehicle/delete", vehicleDelete(&server))

@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/darkphnx/vehiclemanager/internal/models"
+	"github.com/darkphnx/vehiclemanager/internal/usecases"
 )
 
 type vehicleRequestPayload struct {
@@ -22,51 +22,17 @@ func vehicleCreate(server *Server) http.HandlerFunc {
 			return
 		}
 
-		vehicleStatus, err := server.VehicleEnquiryServiceAPI.GetVehicleStatus(payload.RegistrationNumber)
+		vehicleDetails := usecases.VehicleDetails{
+			VehicleEnquiryServiceAPI: server.VehicleEnquiryServiceAPI,
+			MotHistoryAPI:            server.MotHistoryAPI,
+		}
+		vehicle, err := vehicleDetails.Fetch(payload.RegistrationNumber)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 			return
 		}
 
-		vehicleHistory, err := server.MotHistoryAPI.GetVehicleHistory(payload.RegistrationNumber)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		var motHistory []models.MOTTest
-		for _, apiTest := range vehicleHistory.MotTests {
-			var comments []models.RfrAndComments
-			for _, apiComment := range apiTest.RfrAndComments {
-				comment := models.RfrAndComments{
-					Comment: apiComment.Text,
-					Type:    apiComment.Type,
-				}
-				comments = append(comments, comment)
-			}
-
-			test := models.MOTTest{
-				TestNumber:      apiTest.MotTestNumber,
-				Passed:          apiTest.TestResult == "PASSED",
-				CompletedDate:   apiTest.CompletedDate.Time,
-				ExpiryDate:      apiTest.ExpiryDate.Time,
-				OdometerReading: fmt.Sprintf("%d %s", apiTest.OdometerValue, apiTest.OdometerUnit),
-				RfrAndComments:  comments,
-			}
-
-			motHistory = append(motHistory, test)
-		}
-
-		vehicle := models.Vehicle{
-			RegistrationNumber: vehicleStatus.RegistrationNumber,
-			Manufacturer:       vehicleHistory.Make,
-			Model:              vehicleHistory.Model,
-			MotDue:             vehicleHistory.MotTests[0].ExpiryDate.Time,
-			VEDDue:             vehicleStatus.TaxDueDate.Time,
-			MOTHistory:         motHistory,
-		}
-
-		err = models.CreateVehicle(server.Database, &vehicle)
+		err = models.CreateVehicle(server.Database, vehicle)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 			return

@@ -50,6 +50,8 @@ export default function VehicleHistory() {
 
       {MOTs()}
 
+      <LastFetchedAt {...vehicle} />
+
       <div className='row'>
         <div className='column'>
           <button className='button button-outline' onClick={handleDeleteVehicle}>Delete Vehicle</button>
@@ -153,4 +155,18 @@ function Comment({ Comment }) {
   return(
     <li>{Comment}</li>
   );
+}
+
+function LastFetchedAt({ LastFetchedAt }) {
+  if(LastFetchedAt !== null) {
+    return(
+      <div className='row'>
+        <div className = 'column'>
+          <h5>Details last updated: <Moment format="DD/MM/YYYY HH:mm ZZ">{LastFetchedAt}</Moment></h5>
+        </div>
+      </div>
+    );
+  } else {
+    return null;
+  }
 }
