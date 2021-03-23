@@ -1,4 +1,4 @@
-package handlers
+package api
 
 import (
 	"encoding/json"
@@ -9,7 +9,6 @@ import (
 	"github.com/darkphnx/vehiclemanager/internal/usecases"
 	"github.com/darkphnx/vehiclemanager/internal/vesapi"
 	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Server contains items request handling
@@ -19,17 +18,17 @@ type Server struct {
 	MotHistoryAPI            *mothistoryapi.Client
 }
 
-type vehicleRequestPayload struct {
+type vehicleCreatePayload struct {
 	RegistrationNumber string
 }
 
 // VehicleCreate handles an add vehicle request
 func (s *Server) VehicleCreate(w http.ResponseWriter, r *http.Request) {
-	var payload vehicleRequestPayload
+	var payload vehicleCreatePayload
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		renderError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -39,53 +38,80 @@ func (s *Server) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	vehicle, err := vehicleDetails.Fetch(payload.RegistrationNumber)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+		renderError(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
 	err = models.CreateVehicle(s.Database, vehicle)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+		renderError(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(vehicle)
+	renderJSON(w, vehicle, http.StatusCreated)
 }
 
 // VehicleList returns a list of all vehicles
 func (s *Server) VehicleList(w http.ResponseWriter, r *http.Request) {
 	vehicles, err := models.GetAllVehicles(s.Database)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		renderError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(vehicles)
+	renderJSON(w, vehicles, http.StatusOK)
+}
+
+func (s *Server) VehicleShow(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	vehicle, err := models.GetVehicle(s.Database, vars["registration"])
+	if err != nil {
+		renderError(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	renderJSON(w, vehicle, http.StatusOK)
 }
 
 // VehicleDelete deletes a vehicle from the database
 func (s *Server) VehicleDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	vehicleID, err := primitive.ObjectIDFromHex(vars["id"])
+
+	vehicle, err := models.GetVehicle(s.Database, vars["registration"])
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		renderError(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	vehicle := models.Vehicle{ID: vehicleID}
-
-	err = models.DeleteVehicle(s.Database, &vehicle)
+	err = models.DeleteVehicle(s.Database, vehicle)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		renderError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	renderOkay(w, http.StatusOK)
 }
 
-// StaticFiles serves up anything in the UI directory
-func (s *Server) StaticFiles() http.Handler {
-	return http.FileServer(http.Dir("./ui/build"))
+type simpleResponse struct {
+	Status string
+}
+
+type error struct {
+	Status string
+	Error  string
+}
+
+func renderOkay(w http.ResponseWriter, status int) {
+	renderJSON(w, simpleResponse{Status: "ok"}, status)
+}
+
+func renderError(w http.ResponseWriter, errMsg string, status int) {
+	err := error{Status: "error", Error: errMsg}
+	renderJSON(w, err, status)
+}
+
+func renderJSON(w http.ResponseWriter, payload interface{}, status int) {
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(payload)
 }

@@ -8,9 +8,8 @@ export default function VehicleHistory() {
   const [redirectBack, setRedirectBack] = useState(false);
 
   useEffect(()=> {
-    fetch('/vehicles', { 'method' : 'GET' })
+    fetch(`/vehicles/${registrationNumber}`, { 'method' : 'GET' })
       .then(response => response.json())
-      .then(vehicles => findVehicle(vehicles))
       .then(vehicle => setVehicle(vehicle))
   }, [registrationNumber]);
 

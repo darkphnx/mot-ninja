@@ -50,6 +50,18 @@ func CreateVehicle(db *Database, vehicle *Vehicle) error {
 	return err
 }
 
+func GetVehicle(db *Database, registrationNumber string) (*Vehicle, error) {
+	var vehicle Vehicle
+
+	query := bson.M{
+		"registration_number": registrationNumber,
+	}
+
+	err := vehicleCollection(db).FindOne(ctx, query).Decode(&vehicle)
+
+	return &vehicle, err
+}
+
 // DeleteVehicle deletes a vehicle from the database
 func DeleteVehicle(db *Database, vehicle *Vehicle) error {
 	_, err := vehicleCollection(db).DeleteOne(ctx, bson.M{"_id": primitive.ObjectID(vehicle.ID)})
