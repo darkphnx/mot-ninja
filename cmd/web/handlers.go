@@ -6,6 +6,8 @@ import (
 
 	"github.com/darkphnx/vehiclemanager/internal/models"
 	"github.com/darkphnx/vehiclemanager/internal/usecases"
+	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type vehicleRequestPayload struct {
@@ -56,21 +58,18 @@ func vehicleList(server *Server) http.HandlerFunc {
 	}
 }
 
-type singleVehicleRequestPayload struct {
-	ID string
-}
-
 func vehicleDelete(server *Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var payload models.Vehicle
-
-		err := json.NewDecoder(r.Body).Decode(&payload)
+		vars := mux.Vars(r)
+		vehicleID, err := primitive.ObjectIDFromHex(vars["id"])
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		err = models.DeleteVehicle(server.Database, &payload)
+		vehicle := models.Vehicle{ID: vehicleID}
+
+		err = models.DeleteVehicle(server.Database, &vehicle)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

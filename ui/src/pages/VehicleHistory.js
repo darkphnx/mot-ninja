@@ -8,7 +8,7 @@ export default function VehicleHistory() {
   const [redirectBack, setRedirectBack] = useState(false);
 
   useEffect(()=> {
-    fetch('/vehicles', { 'method' : 'get' })
+    fetch('/vehicles', { 'method' : 'GET' })
       .then(response => response.json())
       .then(vehicles => findVehicle(vehicles))
       .then(vehicle => setVehicle(vehicle))
@@ -27,9 +27,8 @@ export default function VehicleHistory() {
   }
 
   function handleDeleteVehicle(e) {
-    fetch('/vehicle/delete', {
+    fetch(`/vehicles/${vehicle.ID}`, {
       method: 'DELETE',
-      body: JSON.stringify({ ID: vehicle.ID })
     }).then(()=> setRedirectBack(true));
   }
 

@@ -88,7 +88,7 @@ function AddVehicleForm({ onVehicleAdded }) {
   }
 
   function submitForm(e) {
-    fetch('/vehicle/create', {
+    fetch('/vehicles', {
       method: 'POST',
       body: JSON.stringify({ "RegistrationNumber" : registrationNumber })
     }).then(response => response.json())

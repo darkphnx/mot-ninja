@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"github.com/darkphnx/vehiclemanager/internal/models"
 	"github.com/darkphnx/vehiclemanager/internal/mothistoryapi"
 	"github.com/darkphnx/vehiclemanager/internal/vesapi"
@@ -35,15 +37,14 @@ func main() {
 
 	go BackgroundUpdateVehicles(&server)
 
-	mux := http.NewServeMux()
-	mux.Handle("/vehicle/create", vehicleCreate(&server))
-	mux.Handle("/vehicle/delete", vehicleDelete(&server))
-	mux.Handle("/vehicles", vehicleList(&server))
+	mux := mux.NewRouter()
+	mux.Handle("/vehicles/{id}", vehicleDelete(&server)).Methods("DELETE")
+	mux.Handle("/vehicles", vehicleList(&server)).Methods("GET")
+	mux.Handle("/vehicles", vehicleCreate(&server)).Methods("POST")
 	mux.Handle("/", staticFiles())
 
-	loggingMiddleware := RequestLoggingMiddleware()
-	loggedMux := loggingMiddleware(mux)
+	mux.Use(RequestLoggingMiddleware())
 
-	err = http.ListenAndServe(":4000", loggedMux)
+	err = http.ListenAndServe(":4000", mux)
 	log.Fatal(err)
 }
