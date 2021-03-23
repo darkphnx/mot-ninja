@@ -7,6 +7,8 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/darkphnx/vehiclemanager/cmd/background"
+	"github.com/darkphnx/vehiclemanager/cmd/handlers"
 	"github.com/darkphnx/vehiclemanager/internal/models"
 	"github.com/darkphnx/vehiclemanager/internal/mothistoryapi"
 	"github.com/darkphnx/vehiclemanager/internal/vesapi"
@@ -29,21 +31,29 @@ func main() {
 		log.Fatal(err)
 	}
 
-	server := Server{
+	vesapiClient := vesapi.NewClient(*vesapiKey, "")
+	mothistoryClient := mothistoryapi.NewClient(*mothistoryapiKey, "")
+
+	backgroundTasks := background.Task{
 		Database:                 database,
-		VehicleEnquiryServiceAPI: vesapi.NewClient(*vesapiKey, ""),
-		MotHistoryAPI:            mothistoryapi.NewClient(*mothistoryapiKey, ""),
+		VehicleEnquiryServiceAPI: vesapiClient,
+		MotHistoryAPI:            mothistoryClient,
+	}
+	go backgroundTasks.Begin()
+
+	handler := handlers.Server{
+		Database:                 database,
+		VehicleEnquiryServiceAPI: vesapiClient,
+		MotHistoryAPI:            mothistoryClient,
 	}
 
-	go BackgroundUpdateVehicles(&server)
-
 	mux := mux.NewRouter()
-	mux.Handle("/vehicles/{id}", vehicleDelete(&server)).Methods("DELETE")
-	mux.Handle("/vehicles", vehicleList(&server)).Methods("GET")
-	mux.Handle("/vehicles", vehicleCreate(&server)).Methods("POST")
-	mux.Handle("/", staticFiles())
+	mux.HandleFunc("/vehicles/{id}", handler.VehicleDelete).Methods("DELETE")
+	mux.HandleFunc("/vehicles", handler.VehicleList).Methods("GET")
+	mux.HandleFunc("/vehicles", handler.VehicleCreate).Methods("POST")
+	mux.Handle("/", handler.StaticFiles())
 
-	mux.Use(RequestLoggingMiddleware())
+	mux.Use(handlers.RequestLoggingMiddleware())
 
 	err = http.ListenAndServe(":4000", mux)
 	log.Fatal(err)
