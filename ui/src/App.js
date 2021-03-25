@@ -14,7 +14,7 @@ function App() {
       <div className="wrapper">
         <nav className="navigation">
           <div className="container">
-            <Link to="/" className="navigation-title">MOTninja</Link>
+            <Link to="/" className="navigation-title">MOT.ninja</Link>
           </div>
         </nav>
 
