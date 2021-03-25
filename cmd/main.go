@@ -51,6 +51,9 @@ func main() {
 
 	mux.Use(api.LoggingMiddleware)
 
+	mux.HandleFunc("/signup", apiServer.Signup).Methods("POST")
+	mux.HandleFunc("/login", apiServer.Login).Methods("POST")
+
 	mux.HandleFunc("/vehicles/{registration}", apiServer.VehicleShow).Methods("GET")
 	mux.HandleFunc("/vehicles/{registration}", apiServer.VehicleDelete).Methods("DELETE")
 	mux.HandleFunc("/vehicles", apiServer.VehicleList).Methods("GET")

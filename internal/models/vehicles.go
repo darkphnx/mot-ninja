@@ -38,8 +38,6 @@ type RfrAndComments struct {
 	Type    string `bson:"type"`
 }
 
-var collectionName = "vehicles"
-
 // CreateVehicle writes a Vehicle struct to the database
 func CreateVehicle(db *Database, vehicle *Vehicle) error {
 	vehicle.ID = primitive.NewObjectID()
@@ -99,7 +97,7 @@ func UpdateVehicle(db *Database, existing *Vehicle, updated *Vehicle) error {
 }
 
 func vehicleCollection(db *Database) *mongo.Collection {
-	return db.Collection(collectionName)
+	return db.Collection("vehicles")
 }
 
 func getVehicles(db *Database, query bson.M) ([]*Vehicle, error) {

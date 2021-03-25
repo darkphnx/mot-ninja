@@ -97,7 +97,7 @@ type simpleResponse struct {
 	Status string
 }
 
-type error struct {
+type errorResponse struct {
 	Status string
 	Error  string
 }
@@ -107,7 +107,7 @@ func renderOkay(w http.ResponseWriter, status int) {
 }
 
 func renderError(w http.ResponseWriter, errMsg string, status int) {
-	err := error{Status: "error", Error: errMsg}
+	err := errorResponse{Status: "error", Error: errMsg}
 	renderJSON(w, err, status)
 }
 
