@@ -48,13 +48,15 @@ func main() {
 	}
 
 	mux := mux.NewRouter()
+
+	mux.Use(api.LoggingMiddleware)
+
 	mux.HandleFunc("/vehicles/{registration}", apiServer.VehicleShow).Methods("GET")
 	mux.HandleFunc("/vehicles/{registration}", apiServer.VehicleDelete).Methods("DELETE")
 	mux.HandleFunc("/vehicles", apiServer.VehicleList).Methods("GET")
 	mux.HandleFunc("/vehicles", apiServer.VehicleCreate).Methods("POST")
-	mux.Handle("/", http.FileServer(http.Dir("./ui/build")))
 
-	mux.Use(api.RequestLoggingMiddleware())
+	mux.Handle("/", http.FileServer(http.Dir("./ui/build")))
 
 	err = http.ListenAndServe(":4000", mux)
 	log.Fatal(err)
