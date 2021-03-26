@@ -26,6 +26,11 @@
   color: inherit;
 }
 
+.navigation-logo {
+  height: 2.2rem;
+  margin-right: 0.2rem;
+}
+
 .content {
   padding-top: 5rem;
 }

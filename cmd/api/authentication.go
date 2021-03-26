@@ -3,14 +3,46 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 
 	"github.com/darkphnx/vehiclemanager/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type signupPayload struct {
-	Email    string
-	Password string
+	Email              string
+	Password           string
+	RegistrationNumber string
+	TermsAndConditions bool
+}
+
+func (sp *signupPayload) Validate() []string {
+	var errors []string
+
+	validEmail, _ := regexp.MatchString(`^.+?@.+?\..+?$`, sp.Email)
+	if !validEmail {
+		errors = append(errors, "E-mail address is not valid")
+	}
+
+	validPassword, _ := regexp.MatchString(`^.{6,64}$`, sp.Password)
+	if !validPassword {
+		errors = append(errors, "Password must be between 6 and 64 characters in length")
+	}
+
+	validRegistration, _ := regexp.MatchString(`^[A-z0-9]{2,7}$`, sp.RegistrationNumber)
+	if !validRegistration {
+		errors = append(errors, "Registration Number must be valid")
+	}
+
+	if !sp.TermsAndConditions {
+		errors = append(errors, "Terms and Conditions must be agreed to")
+	}
+
+	if len(errors) == 0 {
+		return nil
+	} else {
+		return errors
+	}
 }
 
 func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
@@ -19,6 +51,12 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		renderError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	errors := payload.Validate()
+	if errors != nil {
+		renderJSON(w, errors, http.StatusUnprocessableEntity)
 		return
 	}
 
