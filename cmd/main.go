@@ -9,21 +9,16 @@ import (
 
 	"github.com/darkphnx/vehiclemanager/cmd/api"
 	"github.com/darkphnx/vehiclemanager/cmd/background"
+	"github.com/darkphnx/vehiclemanager/internal/authservice"
 	"github.com/darkphnx/vehiclemanager/internal/models"
 	"github.com/darkphnx/vehiclemanager/internal/mothistoryapi"
 	"github.com/darkphnx/vehiclemanager/internal/vesapi"
 )
 
-// Server contains items for DI into handlers
-type Server struct {
-	Database                 *models.Database
-	VehicleEnquiryServiceAPI *vesapi.Client
-	MotHistoryAPI            *mothistoryapi.Client
-}
-
 func main() {
 	vesapiKey := flag.String("vesapi-key", "", "Vehicle Enquiry Service API Key")
 	mothistoryapiKey := flag.String("mothistoryapi-key", "", "MOT History API Key")
+	jwtSigningSecret := flag.String("jwt-signing-secret", "", "JWT Signing Secret")
 	flag.Parse()
 
 	database, err := models.InitDB("mongodb://localhost:27017")
@@ -33,6 +28,7 @@ func main() {
 
 	vesapiClient := vesapi.NewClient(*vesapiKey, "")
 	mothistoryClient := mothistoryapi.NewClient(*mothistoryapiKey, "")
+	authService := authservice.NewAuthService(*jwtSigningSecret, 24, "mot.ninja")
 
 	backgroundTasks := background.Task{
 		Database:                 database,
@@ -45,6 +41,7 @@ func main() {
 		Database:                 database,
 		VehicleEnquiryServiceAPI: vesapiClient,
 		MotHistoryAPI:            mothistoryClient,
+		AuthService:              authService,
 	}
 
 	mux := mux.NewRouter()

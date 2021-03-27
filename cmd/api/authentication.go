@@ -16,6 +16,8 @@ type signupPayload struct {
 	TermsAndConditions bool
 }
 
+const jwtCookieName = "jwt"
+
 func (sp *signupPayload) Validate() []string {
 	var errors []string
 
@@ -105,12 +107,24 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if checkPassword(payload.Password, user.HashedPassword) {
-		// Set cookies etc
-		renderOkay(w, http.StatusOK)
-	} else {
+	if !checkPassword(payload.Password, user.HashedPassword) {
 		renderBadUsernamePassword(w)
+		return
 	}
+
+	accessToken, err := s.AuthService.GenerateAccessToken(user)
+	if err != nil {
+		renderError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     jwtCookieName,
+		Value:    accessToken,
+		HttpOnly: true,
+	})
+
+	renderOkay(w, http.StatusOK)
 }
 
 func renderBadUsernamePassword(w http.ResponseWriter) {

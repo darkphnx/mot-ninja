@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/darkphnx/vehiclemanager/internal/authservice"
 	"github.com/darkphnx/vehiclemanager/internal/models"
 	"github.com/darkphnx/vehiclemanager/internal/mothistoryapi"
 	"github.com/darkphnx/vehiclemanager/internal/usecases"
@@ -16,6 +17,7 @@ type Server struct {
 	Database                 *models.Database
 	VehicleEnquiryServiceAPI *vesapi.Client
 	MotHistoryAPI            *mothistoryapi.Client
+	AuthService              *authservice.AuthService
 }
 
 type vehicleCreatePayload struct {
