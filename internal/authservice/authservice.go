@@ -29,7 +29,7 @@ func NewAuthService(secret string, expirationHours int64, issuer string) *AuthSe
 }
 
 func (as *AuthService) GenerateAccessToken(user *models.User) (string, error) {
-	userID := user.ID.Hex()
+	userID := user.Email
 	expiresAt := time.Now().Add(time.Duration(as.ExpirationHours) * time.Hour)
 
 	claim := TokenClaim{
