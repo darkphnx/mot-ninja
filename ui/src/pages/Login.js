@@ -1,21 +1,33 @@
 import  { useState } from 'react'
+import { Redirect } from "react-router-dom";
+
 import FormErrors from '../components/FormErrors';
 
 export default function Login() {
+  const [redirectRoot, setRedirectRoot] = useState(false);
+
+  function handleLoginSuccess() {
+    setRedirectRoot(true);
+  }
+
+  if(redirectRoot) {
+    return(<Redirect to='/' />);
+  }
+
   return(
     <div className="container">
       <div className="row">
         <div className="column column-50 column-offset-25">
           <h1>Login</h1>
           <h4>Enter your username and password to access your account</h4>
-          <LoginForm />
+          <LoginForm onSuccess={handleLoginSuccess} />
         </div>
       </div>
     </div>
   );
 }
 
-function LoginForm() {
+function LoginForm({ onSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [formErrors, setFormErrors] = useState([]);
@@ -43,13 +55,9 @@ function LoginForm() {
         if(payload.Error) {
           setFormErrors([payload.Error]);
         } else {
-          handleLoginSuccess(payload);
+          onSuccess();
         }
       });
-  }
-
-  function handleLoginSuccess() {
-
   }
 
   return(

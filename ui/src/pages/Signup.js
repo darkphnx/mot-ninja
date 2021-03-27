@@ -1,21 +1,33 @@
 import { useState } from 'react';
+import { Redirect } from "react-router-dom";
+
 import FormErrors from '../components/FormErrors';
 
 export default function Signup() {
+  const [redirectRoot, setRedirectRoot] = useState(false);
+
+  function handleSignupSuccess() {
+    setRedirectRoot(true);
+  }
+
+  if(redirectRoot) {
+    return(<Redirect to='/' />);
+  }
+
   return(
     <div className="container">
       <div className="row">
         <div className="column column-50 column-offset-25">
           <h1>Signup</h1>
           <h4>Enter your e-mail address, registration number and a password to get automatic reminders when your vehicle is due an MOT.</h4>
-          <SignupForm />
+          <SignupForm onSuccess={handleSignupSuccess} />
         </div>
       </div>
     </div>
   );
 }
 
-function SignupForm() {
+function SignupForm({ onSuccess }) {
   const [email, setEmail] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("")
   const [password, setPassword] = useState("");
@@ -57,13 +69,26 @@ function SignupForm() {
         if(payload.Error) {
           setFormErrors(payload.Error);
         } else {
-          handleSignupSuccess(payload);
+          loginUser();
         }
       });
   }
 
-  function handleSignupSuccess() {
-    // login
+  function loginUser() {
+    fetch('/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        "Email": email,
+        "Password": password,
+      })
+    }).then(response => response.json())
+      .then(payload => {
+        if(payload.Error) {
+          setFormErrors([payload.Error]);
+        } else {
+          onSuccess();
+        }
+      });
   }
 
   return(
