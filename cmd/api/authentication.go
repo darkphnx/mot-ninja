@@ -56,7 +56,7 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 
 	errors := payload.Validate()
 	if errors != nil {
-		renderJSON(w, errors, http.StatusUnprocessableEntity)
+		renderError(w, errors, http.StatusUnprocessableEntity)
 		return
 	}
 

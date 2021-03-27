@@ -6,6 +6,7 @@ import {
   Link
 } from "react-router-dom";
 import Signup from './pages/Signup';
+import Login from './pages/Login';
 import VehicleList from './pages/VehicleList';
 import VehicleHistory from './pages/VehicleHistory';
 
@@ -28,6 +29,9 @@ function App() {
           <Switch>
             <Route path="/signup">
               <Signup />
+            </Route>
+            <Route path="/login">
+              <Login />
             </Route>
             <Route path="/:registrationNumber">
               <VehicleHistory />

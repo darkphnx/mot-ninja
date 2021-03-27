@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import FormErrors from '../components/FormErrors';
 
 export default function Signup() {
   return(
@@ -20,6 +21,7 @@ function SignupForm() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [termsAndConditions, setTermsAndConditions] = useState(false);
+  const [formErrors, setFormErrors] = useState([]);
 
   function handleFormInput(e) {
     switch(e.target.id) {
@@ -51,15 +53,23 @@ function SignupForm() {
         "TermsAndConditions": termsAndConditions
       })
     }).then(response => response.json())
-      .then(user => handleSignupSuccess(user))
+      .then(payload => {
+        if(payload.Error) {
+          setFormErrors(payload.Error);
+        } else {
+          handleSignupSuccess(payload);
+        }
+      });
   }
 
   function handleSignupSuccess() {
-
+    // login
   }
 
   return(
     <fieldset>
+      <FormErrors errors={formErrors} />
+
       <label htmlFor="email">E-mail Address</label>
       <input type="email" id="email" value={email} onChange={handleFormInput} />
 

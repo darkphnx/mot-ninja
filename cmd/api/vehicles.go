@@ -98,16 +98,15 @@ type simpleResponse struct {
 }
 
 type errorResponse struct {
-	Status string
-	Error  string
+	Error interface{}
 }
 
 func renderOkay(w http.ResponseWriter, status int) {
 	renderJSON(w, simpleResponse{Status: "ok"}, status)
 }
 
-func renderError(w http.ResponseWriter, errMsg string, status int) {
-	err := errorResponse{Status: "error", Error: errMsg}
+func renderError(w http.ResponseWriter, errMsg interface{}, status int) {
+	err := errorResponse{Error: errMsg}
 	renderJSON(w, err, status)
 }
 
