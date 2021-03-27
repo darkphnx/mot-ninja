@@ -44,6 +44,9 @@ func (s *Server) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user := getUserFromContext(r)
+	vehicle.UserID = user.ID
+
 	err = models.CreateVehicle(s.Database, vehicle)
 	if err != nil {
 		renderError(w, err.Error(), http.StatusUnprocessableEntity)
@@ -55,7 +58,9 @@ func (s *Server) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 
 // VehicleList returns a list of all vehicles
 func (s *Server) VehicleList(w http.ResponseWriter, r *http.Request) {
-	vehicles, err := models.GetAllVehicles(s.Database)
+	user := getUserFromContext(r)
+
+	vehicles, err := models.GetUserVehicles(s.Database, user.ID)
 	if err != nil {
 		renderError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -66,8 +71,9 @@ func (s *Server) VehicleList(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) VehicleShow(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	user := getUserFromContext(r)
 
-	vehicle, err := models.GetVehicle(s.Database, vars["registration"])
+	vehicle, err := models.GetUserVehicle(s.Database, user.ID, vars["registration"])
 	if err != nil {
 		renderError(w, err.Error(), http.StatusNotFound)
 		return
@@ -79,8 +85,9 @@ func (s *Server) VehicleShow(w http.ResponseWriter, r *http.Request) {
 // VehicleDelete deletes a vehicle from the database
 func (s *Server) VehicleDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	user := getUserFromContext(r)
 
-	vehicle, err := models.GetVehicle(s.Database, vars["registration"])
+	vehicle, err := models.GetUserVehicle(s.Database, user.ID, vars["registration"])
 	if err != nil {
 		renderError(w, err.Error(), http.StatusNotFound)
 		return

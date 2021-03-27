@@ -11,6 +11,7 @@ import (
 // Vehicle is a model of a vehicle inclusive of history that can be written to the database
 type Vehicle struct {
 	ID                 primitive.ObjectID `bson:"_id"`
+	UserID             primitive.ObjectID `bson:"user_id"`
 	RegistrationNumber string             `bson:"registration_number"`
 	Manufacturer       string             `bson:"manufacturer"`
 	Model              string             `bson:"model"`
@@ -48,11 +49,12 @@ func CreateVehicle(db *Database, vehicle *Vehicle) error {
 	return err
 }
 
-func GetVehicle(db *Database, registrationNumber string) (*Vehicle, error) {
+func GetUserVehicle(db *Database, userID primitive.ObjectID, registrationNumber string) (*Vehicle, error) {
 	var vehicle Vehicle
 
 	query := bson.M{
 		"registration_number": registrationNumber,
+		"user_id":             userID,
 	}
 
 	err := vehicleCollection(db).FindOne(ctx, query).Decode(&vehicle)
@@ -67,9 +69,11 @@ func DeleteVehicle(db *Database, vehicle *Vehicle) error {
 	return err
 }
 
-// GetAllVehicles fetches all vehicles
-func GetAllVehicles(db *Database) ([]*Vehicle, error) {
-	query := bson.M{}
+// GetUserVehicles fetches all vehicles for the given user ID
+func GetUserVehicles(db *Database, userID primitive.ObjectID) ([]*Vehicle, error) {
+	query := bson.M{
+		"user_id": userID,
+	}
 
 	return getVehicles(db, query)
 }

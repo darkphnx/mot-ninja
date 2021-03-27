@@ -91,7 +91,11 @@ func (s *Server) AuthJwtTokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "user", &user)
+		ctx := context.WithValue(r.Context(), "user", user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func getUserFromContext(r *http.Request) *models.User {
+	return r.Context().Value("user").(*models.User)
 }

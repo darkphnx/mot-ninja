@@ -26,7 +26,7 @@ export default function VehicleHistory() {
   }
 
   function handleDeleteVehicle(e) {
-    fetch(`/vehicles/${vehicle.ID}`, {
+    fetch(`/vehicles/${vehicle.RegistrationNumber}`, {
       method: 'DELETE',
     }).then(()=> setRedirectBack(true));
   }
