@@ -89,6 +89,20 @@ func UserVehicleExists(db *Database, userID primitive.ObjectID, registrationNumb
 	return err == nil && count > 0
 }
 
+func UserVehicleCount(db *Database, userID primitive.ObjectID) int64 {
+	query := bson.M{
+		"user_id": userID,
+	}
+
+	count, err := vehicleCollection(db).CountDocuments(ctx, query)
+
+	if err != nil {
+		return 0
+	}
+
+	return count
+}
+
 // GetVehiclesUpdatedBefore fetches any vehicle that has a LastRemotePull value less than timestamp
 func GetVehiclesUpdatedBefore(db *Database, timestamp time.Time) ([]*Vehicle, error) {
 	query := bson.M{

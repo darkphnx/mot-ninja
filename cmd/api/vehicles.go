@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -38,6 +39,12 @@ func (vcp *vehicleCreatePayload) Validate(db *models.Database, user *models.User
 	vehicleExists := models.UserVehicleExists(db, user.ID, registrationNumber)
 	if vehicleExists {
 		errors = append(errors, "Vehicle is already added to your account")
+	}
+
+	vehicleCount := models.UserVehicleCount(db, user.ID)
+	if user.VehicleLimit != 0 && vehicleCount >= user.VehicleLimit {
+		errMsg := fmt.Sprintf("You cannot exceed %d vehicles", user.VehicleLimit)
+		errors = append(errors, errMsg)
 	}
 
 	if len(errors) == 0 {

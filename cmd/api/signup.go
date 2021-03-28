@@ -74,6 +74,7 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 	user := models.User{
 		Email:          payload.Email,
 		HashedPassword: hashedPassword,
+		VehicleLimit:   5,
 	}
 
 	err = models.CreateUser(s.Database, &user)

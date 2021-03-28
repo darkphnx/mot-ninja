@@ -11,7 +11,8 @@ import (
 type User struct {
 	ID             primitive.ObjectID `bson:"_id"`
 	Email          string             `bson:"email"`
-	HashedPassword string             `bson:"hashed_password"`
+	HashedPassword string             `bson:"hashed_password" json:"-"`
+	VehicleLimit   int64              `bson:"vehicle_limit"`
 	CreatedAt      time.Time          `bson:"created_at"`
 	UpdatedAt      time.Time          `bson:"updated_at"`
 }
