@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Moment from 'react-moment';
 import moment from 'moment';
 import { Link } from "react-router-dom";
+import FormErrors from '../components/FormErrors';
 
 export default function VehicleList() {
   const [vehicles, setVehicles] = useState([]);
@@ -82,6 +83,7 @@ function SearchVehicleForm({ onSearchUpdate }) {
 
 function AddVehicleForm({ onVehicleAdded }) {
   const [registrationNumber, setRegistrationNumber] = useState("")
+  const [formErrors, setFormErrors] = useState([])
 
   function handleRegistrationNumber(e) {
     setRegistrationNumber(e.target.value);
@@ -92,7 +94,13 @@ function AddVehicleForm({ onVehicleAdded }) {
       method: 'POST',
       body: JSON.stringify({ "RegistrationNumber" : registrationNumber })
     }).then(response => response.json())
-      .then(vehicle => handleVehicleAdded(vehicle))
+      .then(payload => {
+        if (payload.Error) {
+          setFormErrors(payload.Error)
+        } else {
+          handleVehicleAdded(payload)
+        }
+      });
   }
 
   function handleVehicleAdded(vehicle) {
@@ -101,13 +109,16 @@ function AddVehicleForm({ onVehicleAdded }) {
   }
 
   return (
-    <div className='row add-vehicle-form'>
-      <div className='column'>
-        <input type='text' id='registration-number' placeholder='Registration Number' value={registrationNumber} onChange={handleRegistrationNumber}/>
-      </div>
+    <div>
+      <FormErrors errors={formErrors} />
+      <div className='add-vehicle-form row'>
+        <div className='column'>
+          <input type='text' id='registration-number' placeholder='Registration Number' value={registrationNumber} onChange={handleRegistrationNumber}/>
+        </div>
 
-      <div className='column'>
-        <a href='#' className='button' onClick={submitForm}>Add Vehicle</a>
+        <div className='column'>
+          <a href='#' className='button' onClick={submitForm}>Add Vehicle</a>
+        </div>
       </div>
     </div>
   )

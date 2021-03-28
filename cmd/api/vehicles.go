@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
+	"strings"
 
 	"github.com/darkphnx/vehiclemanager/internal/authservice"
 	"github.com/darkphnx/vehiclemanager/internal/models"
@@ -24,6 +26,27 @@ type vehicleCreatePayload struct {
 	RegistrationNumber string
 }
 
+func (vcp *vehicleCreatePayload) Validate(db *models.Database, user *models.User) []string {
+	var errors []string
+
+	registrationNumber := strings.ReplaceAll(strings.ToUpper(vcp.RegistrationNumber), " ", "")
+	validRegistration, _ := regexp.MatchString(`^[A-z0-9]{2,7}$`, registrationNumber)
+	if !validRegistration {
+		errors = append(errors, "Registration Number must be valid")
+	}
+
+	vehicleExists := models.UserVehicleExists(db, user.ID, registrationNumber)
+	if vehicleExists {
+		errors = append(errors, "Vehicle is already added to your account")
+	}
+
+	if len(errors) == 0 {
+		return nil
+	} else {
+		return errors
+	}
+}
+
 // VehicleCreate handles an add vehicle request
 func (s *Server) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 	var payload vehicleCreatePayload
@@ -31,6 +54,14 @@ func (s *Server) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		renderError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user := getUserFromContext(r)
+
+	validationErrors := payload.Validate(s.Database, user)
+	if validationErrors != nil {
+		renderError(w, validationErrors, http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -44,7 +75,6 @@ func (s *Server) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := getUserFromContext(r)
 	vehicle.UserID = user.ID
 
 	err = models.CreateVehicle(s.Database, vehicle)
