@@ -16,12 +16,17 @@ type signupPayload struct {
 	TermsAndConditions bool
 }
 
-func (sp *signupPayload) Validate() []string {
+func (sp *signupPayload) Validate(db *models.Database) []string {
 	var errors []string
 
 	validEmail, _ := regexp.MatchString(`^.+?@.+?\..+?$`, sp.Email)
 	if !validEmail {
 		errors = append(errors, "E-mail address is not valid")
+	}
+
+	emailExists := models.UserExists(db, sp.Email)
+	if emailExists {
+		errors = append(errors, "E-mail address is already registered")
 	}
 
 	validPassword, _ := regexp.MatchString(`^.{6,64}$`, sp.Password)
@@ -54,7 +59,7 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errors := payload.Validate()
+	errors := payload.Validate(s.Database)
 	if errors != nil {
 		renderError(w, errors, http.StatusUnprocessableEntity)
 		return

@@ -38,6 +38,16 @@ func GetUser(db *Database, email string) (*User, error) {
 	return &user, err
 }
 
+func UserExists(db *Database, email string) bool {
+	query := bson.M{
+		"email": email,
+	}
+
+	count, err := userCollection(db).CountDocuments(ctx, query)
+
+	return err == nil && count > 0
+}
+
 func userCollection(db *Database) *mongo.Collection {
 	return db.Collection("users")
 }
