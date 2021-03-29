@@ -60,7 +60,6 @@ function SignupForm({ onSuccess }) {
       method: 'POST',
       body: JSON.stringify({
         "Email": email,
-        "RegistrationNumber" : registrationNumber,
         "Password": password,
         "PasswordConfirm": passwordConfirm,
         "TermsAndConditions": termsAndConditions
@@ -87,9 +86,18 @@ function SignupForm({ onSuccess }) {
         if(payload.Error) {
           setFormErrors([payload.Error]);
         } else {
-          onSuccess();
+          addVehicle();
         }
       });
+  }
+
+  function addVehicle() {
+    fetch('/vehicles', {
+      method: 'POST',
+      body: JSON.stringify({
+        "RegistrationNumber": registrationNumber
+      })
+    }).then(() => onSuccess());
   }
 
   return(
