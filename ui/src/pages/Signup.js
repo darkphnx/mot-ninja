@@ -62,6 +62,7 @@ function SignupForm({ onSuccess }) {
         "Email": email,
         "RegistrationNumber" : registrationNumber,
         "Password": password,
+        "PasswordConfirm": passwordConfirm,
         "TermsAndConditions": termsAndConditions
       })
     }).then(response => response.json())

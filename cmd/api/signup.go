@@ -6,12 +6,14 @@ import (
 	"regexp"
 
 	"github.com/darkphnx/vehiclemanager/internal/models"
+	"github.com/darkphnx/vehiclemanager/internal/usecases"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type signupPayload struct {
 	Email              string
 	Password           string
+	PasswordConfirm    string
 	RegistrationNumber string
 	TermsAndConditions bool
 }
@@ -32,6 +34,10 @@ func (sp *signupPayload) Validate(db *models.Database) []string {
 	validPassword, _ := regexp.MatchString(`^.{6,64}$`, sp.Password)
 	if !validPassword {
 		errors = append(errors, "Password must be between 6 and 64 characters in length")
+	}
+
+	if sp.Password != sp.PasswordConfirm {
+		errors = append(errors, "Password and confirmation must be the same")
 	}
 
 	validRegistration, _ := regexp.MatchString(`^[A-z0-9]{2,7}$`, sp.RegistrationNumber)
@@ -71,6 +77,15 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	vehicleDetails := usecases.VehicleDetails{
+		VehicleEnquiryServiceAPI: s.VehicleEnquiryServiceAPI,
+		MotHistoryAPI:            s.MotHistoryAPI,
+	}
+	vehicle, err := vehicleDetails.Fetch(payload.RegistrationNumber)
+	if err != nil {
+		renderError(w, err.Error(), http.StatusUnprocessableEntity)
+	}
+
 	user := models.User{
 		Email:          payload.Email,
 		HashedPassword: hashedPassword,
@@ -82,6 +97,9 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 		renderError(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
+
+	vehicle.UserID = user.ID
+	_ = models.CreateVehicle(s.Database, vehicle)
 
 	renderJSON(w, &user, http.StatusCreated)
 }
