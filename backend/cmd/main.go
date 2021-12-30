@@ -52,12 +52,12 @@ func main() {
 	mux.HandleFunc("/login", apiServer.Login).Methods("POST")
 	mux.HandleFunc("/logout", apiServer.Logout).Methods("GET")
 
-	authMux := mux.PathPrefix("").Subrouter()
-	authMux.Use(apiServer.AuthJwtTokenMiddleware)
-	authMux.HandleFunc("/vehicles/{registration}", apiServer.VehicleShow).Methods("GET")
-	authMux.HandleFunc("/vehicles/{registration}", apiServer.VehicleDelete).Methods("DELETE")
-	authMux.HandleFunc("/vehicles", apiServer.VehicleList).Methods("GET")
-	authMux.HandleFunc("/vehicles", apiServer.VehicleCreate).Methods("POST")
+	apiMux := mux.PathPrefix("/api").Subrouter()
+	apiMux.Use(apiServer.AuthJwtTokenMiddleware)
+	apiMux.HandleFunc("/vehicles/{registration}", apiServer.VehicleShow).Methods("GET")
+	apiMux.HandleFunc("/vehicles/{registration}", apiServer.VehicleDelete).Methods("DELETE")
+	apiMux.HandleFunc("/vehicles", apiServer.VehicleList).Methods("GET")
+	apiMux.HandleFunc("/vehicles", apiServer.VehicleCreate).Methods("POST")
 
 	mux.Handle("/", http.FileServer(http.Dir("./ui/build")))
 

@@ -9,7 +9,7 @@ export default function VehicleList() {
   const [searchFilter, setSearchFilter] = useState("");
 
   useEffect(()=> {
-    fetch('/vehicles', { method: 'GET' })
+    fetch('/api/vehicles', { method: 'GET' })
       .then(response => response.json())
       .then(vehicles => setVehicles(vehicles || []));
   }, []);
@@ -90,7 +90,7 @@ function AddVehicleForm({ onVehicleAdded }) {
   }
 
   function submitForm(e) {
-    fetch('/vehicles', {
+    fetch('/api/vehicles', {
       method: 'POST',
       body: JSON.stringify({ "RegistrationNumber" : registrationNumber })
     }).then(response => response.json())
