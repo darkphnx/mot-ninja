@@ -175,11 +175,11 @@ function Vehicle({ ID, RegistrationNumber, Manufacturer, Model, MotDue, VEDDue, 
     return sortedHistory[0];
   }
 
-  const latestMOT = findLatestMOT();
+  function advisoryCount(MOT) {
+    const advisoryCommentTypes = ['MINOR', 'ADVISORY']
 
-  function advisoryCount() {
-    if(latestMOT != null && latestMOT.RfrAndComments != null) {
-      const advisories = latestMOT.RfrAndComments.filter(comment => comment.Type === 'MINOR')
+    if(MOT != null && MOT.RfrAndComments != null) {
+      const advisories = MOT.RfrAndComments.filter(comment => advisoryCommentTypes.includes(comment.Type))
 
       return advisories.length;
     } else {
@@ -187,6 +187,7 @@ function Vehicle({ ID, RegistrationNumber, Manufacturer, Model, MotDue, VEDDue, 
     }
   }
 
+  const latestMOT = findLatestMOT();
 
   return(
     <tr>
@@ -195,7 +196,7 @@ function Vehicle({ ID, RegistrationNumber, Manufacturer, Model, MotDue, VEDDue, 
       </td>
       <td>{Manufacturer} {Model}</td>
       <td>{expiredOrDue(MotDue)} <Moment format='DD/MM/YYYY'>{MotDue}</Moment></td>
-      <td>{advisoryCount()}</td>
+      <td>{advisoryCount(latestMOT)}</td>
     </tr>
   );
 }
