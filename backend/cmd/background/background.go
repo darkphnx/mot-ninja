@@ -51,7 +51,12 @@ func (bt *Task) updateVehicles() {
 			log.Println(err)
 		}
 
-		err = models.UpdateVehicle(bt.Database, vehicle, updatedVehicleDetails)
+		vehicle.MOTHistory = updatedVehicleDetails.MOTHistory
+		vehicle.MotDue = updatedVehicleDetails.MotDue
+		vehicle.VEDDue = updatedVehicleDetails.VEDDue
+		vehicle.LastFetchedAt = updatedVehicleDetails.LastFetchedAt
+
+		err = models.UpdateVehicle(bt.Database, vehicle)
 		if err != nil {
 			log.Println(err)
 		}

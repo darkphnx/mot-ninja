@@ -113,13 +113,11 @@ func GetVehiclesUpdatedBefore(db *Database, timestamp time.Time) ([]*Vehicle, er
 }
 
 // UpdateVehicle replaces the existing vehicle with a brand new one
-func UpdateVehicle(db *Database, existing *Vehicle, updated *Vehicle) error {
-	updated.ID = existing.ID
-
+func UpdateVehicle(db *Database, v *Vehicle) error {
 	_, err := vehicleCollection(db).ReplaceOne(
 		ctx,
-		bson.M{"_id": primitive.ObjectID(existing.ID)},
-		updated,
+		bson.M{"_id": primitive.ObjectID(v.ID)},
+		v,
 	)
 
 	return err
