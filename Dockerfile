@@ -29,8 +29,6 @@ COPY ./ui/yarn.lock ./
 COPY ./ui/public ./public
 COPY ./ui/src ./src
 
-RUN ls
-
 RUN yarn
 RUN yarn build
 
@@ -41,9 +39,14 @@ FROM alpine:3.15.0
 
 WORKDIR /app
 
-COPY --from=backend-build /backend-server /app/backend-server
-COPY --from=ui-build /build-server /app/ui/build
+COPY --from=backend-build /backend-server /app/backend/backend-server
+COPY --from=ui-build /app/build /app/ui/build
 
 EXPOSE 4000
 
-ENTRYPOINT ["/app/backend-server"]
+ENV VES_API_KEY ""
+ENV MOT_HISTORY_API_KEY ""
+ENV JWT_SIGNING_SECRET ""
+ENV MONGO_CONNECTION_STRING ""
+
+CMD /app/backend/backend-server -vesapi-key=${VES_API_KEY} -mothistoryapi-key=${MOT_HISTORY_API_KEY} -jwt-signing-secret=${JWT_SIGNING_SECRET} -mongo-connection-string=${MONGO_CONNECTION_STRING}
