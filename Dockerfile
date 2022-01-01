@@ -13,8 +13,6 @@ RUN go mod download
 
 COPY ./backend ./
 
-RUN ls
-
 RUN go build -o /backend-server cmd/main.go
 
 ##
